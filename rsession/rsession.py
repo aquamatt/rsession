@@ -5,7 +5,7 @@ from django.utils.encoding import force_unicode
 
 from redis import Redis
 
-KEY_PREFIX = "%s:%%s" % getattr(settings,"RSESSION_PREFIX", "RSESSION")
+KEY_PREFIX = "%s:%%s" % settings.RSESSION.get("PREFIX", "RSESSION")
 
 class SessionStore(SessionBase):
     """
@@ -14,10 +14,10 @@ class SessionStore(SessionBase):
     def __init__(self, session_key=None):
         super(SessionStore, self).__init__(session_key)
         self.db = Redis(
-                settings.RSESSION_HOST,
-                settings.RSESSION_PORT,
-                settings.RSESSION_DB,
-                settings.RSESSION_PASSWORD,
+                settings.RSESSION.get('HOST', 'localhost'),
+                settings.RSESSION.get('PORT', 6379),
+                settings.RSESSION.get('DB', 0),
+                settings.RSESSION.get('PASSWORD', ''),
         ) 
 
     def load(self):

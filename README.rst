@@ -18,11 +18,13 @@ To use, install Redis and amend your Django settings as follows, substituting
 appropriate values if your Redis server is not a default installation 
 on localhost::
 
-    RSESSION_HOST = "localhost"
-    RSESSION_PORT = 6379
-    RSESSION_DB = 0
-    RSESSION_PASSWORD = ''
-    RSESSION_PREFIX = 'RSESSION'
+    RSESSION = {
+        'HOST'     : 'localhost',
+        'PORT'     : 6379,
+        'DB'       : 0,
+        'PASSWORD' : '',
+        'PREFIX'   : 'RSESSION',
+    }
 
     SESSION_ENGINE = "rsession.rsession"
     # 14 days is default expiry for Django. Setting included
