@@ -12,7 +12,6 @@ setup(
     package_data={'': []},
     license='BSD',
     classifiers=[
-        'Development Status :: 2 - Beta',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
