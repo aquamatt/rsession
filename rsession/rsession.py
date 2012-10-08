@@ -1,4 +1,3 @@
-import datetime
 from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 from django.utils.encoding import force_unicode
@@ -7,6 +6,7 @@ from redis import Redis
 
 KEY_PREFIX = "%s:%%s" % settings.RSESSION.get("PREFIX", "RSESSION")
 
+
 class SessionStore(SessionBase):
     """
     Implements database session store.
@@ -14,11 +14,11 @@ class SessionStore(SessionBase):
     def __init__(self, session_key=None):
         super(SessionStore, self).__init__(session_key)
         self.db = Redis(
-                settings.RSESSION.get('HOST', 'localhost'),
-                settings.RSESSION.get('PORT', 6379),
-                settings.RSESSION.get('DB', 0),
-                settings.RSESSION.get('PASSWORD', ''),
-        ) 
+            settings.RSESSION.get('HOST', 'localhost'),
+            settings.RSESSION.get('PORT', 6379),
+            settings.RSESSION.get('DB', 0),
+            settings.RSESSION.get('PASSWORD', ''),
+        )
 
     def load(self):
         session_data = self.db.get(KEY_PREFIX % self.session_key)
@@ -60,13 +60,12 @@ class SessionStore(SessionBase):
 
         key = KEY_PREFIX % self.session_key
         result = setter_fn(key,
-                    self.encode(self._get_session(no_load=must_create)))
+                           self.encode(self._get_session(no_load=must_create)))
 
-        if must_create and result == False:
+        if must_create and result is False:
             raise CreateError
-        
-        self.db.expire(key, self.get_expiry_age())
 
+        self.db.expire(key, self.get_expiry_age())
 
     def delete(self, session_key=None):
         if session_key is None:

@@ -2,15 +2,17 @@ from setuptools import setup, find_packages
 
 setup(
     name='rsession',
-    version='0.0.1',
+    version='0.1.0',
     description='Django session back-end persisting to Redis',
     author='Matthew Pontefract',
     author_email='matthew@zorinholdings.com',
-    url='https://github.com/aquamatt/',
+    url='https://github.com/aquamatt/rsession/',
+    keywords='django, sessions, redis',
     packages=find_packages(),
     package_data={'': []},
+    license='BSD',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 2 - Beta',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

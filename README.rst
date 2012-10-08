@@ -1,7 +1,7 @@
 rsession
 ========
 
-rsession is yet another  Redis-backed Django session store.
+rsession is yet another Redis-backed Django session store.
 
 There are a few available within a short Google but it was
 not clear which should be used and differences between them
@@ -12,7 +12,7 @@ session store with each method modified to suit Redis.
 
 Installation of rsession is easily accomplished with pip::
 
-    $ pip install git+git://github.com/aquamatt/rsession.git
+    $ pip install rsession
 
 To use, install Redis and amend your Django settings as follows, substituting 
 appropriate values if your Redis server is not a default installation 
@@ -30,7 +30,9 @@ on localhost::
     # 14 days is default expiry for Django. Setting included
     # here to remind the user that the session length is modifiable
     # and probably should be for your application
-    SESSION_COOKIE_AGE = 60*60*24*14 # 14 days in seconds
+    SESSION_COOKIE_AGE = 60 * 60 * 24 * 14 # 14 days in seconds
+    SESSION_SAVE_EVERY_REQUEST = True
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 Finally, whilst not essential, you can remove ``django.contrib.sessions`` from 
 your installed apps as this is only required if using
