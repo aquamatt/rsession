@@ -1,3 +1,4 @@
+import logging
 from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 from django.utils.encoding import force_unicode
@@ -6,6 +7,7 @@ from redis import Redis
 
 KEY_PREFIX = "%s:%%s" % settings.RSESSION.get("PREFIX", "RSESSION")
 
+logger = logging.getLogger("rsession")
 
 class SessionStore(SessionBase):
     """
@@ -21,30 +23,44 @@ class SessionStore(SessionBase):
         )
 
     def load(self):
-        session_data = self.db.get(KEY_PREFIX % self.session_key)
+        session_data = self.db.get(self.session_key)
         if session_data is None:
             self.create()
             return {}
         return self.decode(force_unicode(session_data))
 
     def exists(self, session_key):
-        if self.db.exists(KEY_PREFIX % session_key):
+        if self.db.exists(session_key):
             return True
         return False
 
+    def _make_key(self):
+        return KEY_PREFIX % self._get_new_session_key()
+
     def create(self):
         while True:
-            self._session_key = self._get_new_session_key()
-            try:
-                # Save immediately to ensure we have a unique entry in the
-                # database.
-                self.save(must_create=True)
-            except CreateError:
-                # Key wasn't unique. Try again.
+            self._session_key = self._make_key()
+            setter_fn = self._redis_method(True)
+            # Save immediately to ensure we have a unique entry in the
+            # database.
+            result = setter_fn(self.session_key, 
+                               self.encode(self._get_session(no_load=True)))
+
+            if result is False:
                 continue
+
+            self.db.expire(self.session_key, self.get_expiry_age())
+
             self.modified = True
             self._session_cache = {}
             return
+
+    def _redis_method(self, must_create=False):
+        """
+        Return the redis method to use to save the key
+        """
+        setter_fn = self.db.setnx if must_create else self.db.set
+        return setter_fn
 
     def save(self, must_create=False):
         """
@@ -53,12 +69,16 @@ class SessionStore(SessionBase):
         create a *new* entry (as opposed to possibly updating an existing
         entry).
         """
-        if must_create and self.exists(self.session_key):
-            raise CreateError
+        if must_create:
+            if self.exists(self.session_key):
+                raise CreateError
+            self.create()
 
-        setter_fn = self.db.setnx if must_create else self.db.set
+        if self.session_key is None:
+            self.create()
 
-        key = KEY_PREFIX % self.session_key
+        setter_fn = self._redis_method(must_create)
+        key = self.session_key
         result = setter_fn(key,
                            self.encode(self._get_session(no_load=must_create)))
 
