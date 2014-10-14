@@ -23,6 +23,7 @@ class SessionStore(SessionBase):
         )
 
     def load(self):
+        logger.debug("RSession loading session {}".format(self.session_key))
         session_data = self.db.get(self.session_key)
         if session_data is None:
             self.create()
@@ -30,6 +31,7 @@ class SessionStore(SessionBase):
         return self.decode(force_unicode(session_data))
 
     def exists(self, session_key):
+        logger.debug("RSession testing existence of session {}".format(session_key))
         if self.db.exists(session_key):
             return True
         return False
@@ -79,6 +81,7 @@ class SessionStore(SessionBase):
 
         setter_fn = self._redis_method(must_create)
         key = self.session_key
+        logger.debug("RSession saving session {}".format(key))
         result = setter_fn(key,
                            self.encode(self._get_session(no_load=must_create)))
 
